@@ -6,12 +6,14 @@ import { useEffect } from "react";
 import "react-native-reanimated";
 import "./global.css";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { Text, View } from "react-native";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+
   const [loaded] = useFonts({
     "Jakarta-Bold": require("../assets/fonts/PlusJakartaSans-Bold.ttf"),
     "Jakarta-ExtraBold": require("../assets/fonts/PlusJakartaSans-ExtraBold.ttf"),
@@ -33,10 +35,12 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack>
+    <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen
         name="index"
-        options={{ headerShown: false }}
+        options={{
+          headerShown: false,
+        }}
       />
 
       <Stack.Screen
