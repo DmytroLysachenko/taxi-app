@@ -7,7 +7,7 @@ import { Link } from "expo-router";
 import OAuth from "@/components/OAuth";
 
 const SignIn = () => {
-  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [form, setForm] = useState({ email: "", password: "" });
 
   const onSignInPress = async () => {};
 
@@ -21,19 +21,11 @@ const SignIn = () => {
           />
 
           <Text className="text-2xl text-black font-JakartaSemiBold absolute bottom-5 left-5">
-            Create Your Account
+            Welcome!
           </Text>
         </View>
 
         <View className="p-5">
-          <InputField
-            label="Name"
-            placeholder="Enter your name"
-            icon={icons.person}
-            value={form.name}
-            onChangeText={(value: string) => setForm({ ...form, name: value })}
-          />
-
           <InputField
             label="Email"
             placeholder="Enter your email"
@@ -54,7 +46,7 @@ const SignIn = () => {
           />
 
           <CustomButton
-            title="Sign Up"
+            title="Sign In"
             onPress={onSignInPress}
             className="mt-6"
           />
@@ -62,12 +54,12 @@ const SignIn = () => {
           <OAuth />
 
           <Link
-            href={"/(auth)/sign-in"}
+            href={"/(auth)/sign-up"}
             className="text-lg text-center text-general-200 mt-10"
           >
-            <Text>Already have an account? </Text>
+            <Text>Still do not have an account? </Text>
 
-            <Text className="text-primary-500">Log In</Text>
+            <Text className="text-primary-500">Sign up</Text>
           </Link>
         </View>
       </View>

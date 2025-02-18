@@ -1,18 +1,18 @@
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { ClerkProvider, ClerkLoaded } from "@clerk/clerk-expo";
+import { tokenCache } from "@/lib/auth";
 
 import { useEffect } from "react";
 import "react-native-reanimated";
 import "./global.css";
-import { useColorScheme } from "@/hooks/useColorScheme";
-import { Text, View } from "react-native";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+  const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!;
 
   const [loaded] = useFonts({
     "Jakarta-Bold": require("../assets/fonts/PlusJakartaSans-Bold.ttf"),
@@ -23,6 +23,10 @@ export default function RootLayout() {
     "Jakarta-Regular": require("../assets/fonts/PlusJakartaSans-Regular.ttf"),
     "Jakarta-SemiBold": require("../assets/fonts/PlusJakartaSans-SemiBold.ttf"),
   });
+
+  if (!publishableKey) {
+    throw new Error("Add EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY to your .env file");
+  }
 
   useEffect(() => {
     if (loaded) {
@@ -35,28 +39,35 @@ export default function RootLayout() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen
-        name="index"
-        options={{
-          headerShown: false,
-        }}
-      />
+    <ClerkProvider
+      tokenCache={tokenCache}
+      publishableKey={publishableKey}
+    >
+      <ClerkLoaded>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen
+            name="index"
+            options={{
+              headerShown: false,
+            }}
+          />
 
-      <Stack.Screen
-        name="(root)"
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="(root)"
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="(auth)"
-        options={{ headerShown: false }}
-      />
+          <Stack.Screen
+            name="(auth)"
+            options={{ headerShown: false }}
+          />
 
-      <Stack.Screen
-        name="+not-found"
-        options={{ headerShown: false }}
-      />
-    </Stack>
+          <Stack.Screen
+            name="+not-found"
+            options={{ headerShown: false }}
+          />
+        </Stack>{" "}
+      </ClerkLoaded>
+    </ClerkProvider>
   );
 }
