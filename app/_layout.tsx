@@ -66,7 +66,7 @@ export default function RootLayout() {
             name="+not-found"
             options={{ headerShown: false }}
           />
-        </Stack>{" "}
+        </Stack>
       </ClerkLoaded>
     </ClerkProvider>
   );

@@ -7,9 +7,11 @@ import { Link, router } from "expo-router";
 import OAuth from "@/components/OAuth";
 import { useSignUp } from "@clerk/clerk-expo";
 import { ReactNativeModal } from "react-native-modal";
+import { fetchAPI } from "@/lib/fetch";
 
 const SignUp = () => {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const { isLoaded, signUp, setActive } = useSignUp();
 
@@ -46,9 +48,17 @@ const SignUp = () => {
       });
 
       if (signUpAttempt.status === "complete") {
+        await fetchAPI("/(api)/user", {
+          method: "POST",
+          body: JSON.stringify({
+            name: form.name,
+            email: form.email,
+            clerkId: signUpAttempt.createdUserId,
+          }),
+        });
+
         await setActive({ session: signUpAttempt.createdSessionId });
         setVerification({ ...verification, state: "success" });
-        router.replace("/");
       } else {
         console.error(JSON.stringify(signUpAttempt, null, 2));
         setVerification({
@@ -93,7 +103,7 @@ const SignUp = () => {
           <InputField
             label="Email"
             placeholder="Enter your email"
-            icon={icons.person}
+            icon={icons.email}
             value={form.email}
             onChangeText={(value: string) => setForm({ ...form, email: value })}
           />
@@ -102,7 +112,7 @@ const SignUp = () => {
             label="Password"
             placeholder="Enter your password"
             secureTextEntry
-            icon={icons.person}
+            icon={icons.lock}
             value={form.password}
             onChangeText={(value: string) =>
               setForm({ ...form, password: value })
@@ -129,9 +139,9 @@ const SignUp = () => {
 
         <ReactNativeModal
           isVisible={verification.state === "pending"}
-          onModalHide={() =>
-            setVerification({ ...verification, state: "success" })
-          }
+          onModalHide={() => {
+            if (verification.state === "success") setShowSuccessModal(true);
+          }}
         >
           <View className="bg-white px-7 py-9 rounded-2xl min-h-[300px]">
             <Text className="text-2xl font-JakartaExtraBold mb-2">
@@ -167,7 +177,7 @@ const SignUp = () => {
           </View>
         </ReactNativeModal>
 
-        <ReactNativeModal isVisible={verification.state === "success"}>
+        <ReactNativeModal isVisible={showSuccessModal}>
           <View className="bg-white px-7 py-9 rounded-2xl min-h-[300px]">
             <Image
               source={images.check}
@@ -185,7 +195,10 @@ const SignUp = () => {
             <CustomButton
               title="Browse Home"
               className="mt-5"
-              onPress={() => router.replace("/(root)/(tabs)/home")}
+              onPress={() => {
+                setShowSuccessModal(false);
+                router.push("/(root)/(tabs)/home");
+              }}
             />
           </View>
         </ReactNativeModal>
