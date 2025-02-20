@@ -138,7 +138,7 @@ export default function Page() {
     const requestLocation = async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
 
-      if (status === "granted") {
+      if (status !== "granted") {
         return;
       }
 
