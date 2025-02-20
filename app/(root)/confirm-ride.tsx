@@ -8,6 +8,7 @@ import { useDriverStore } from "@/store";
 
 const ConfirmRide = () => {
   const { drivers, selectedDriver, setSelectedDriver } = useDriverStore();
+  console.log(drivers, selectedDriver);
 
   return (
     <RideLayout
@@ -16,11 +17,11 @@ const ConfirmRide = () => {
     >
       <FlatList
         data={drivers}
-        renderItem={(item) => (
+        renderItem={({ item }) => (
           <DriverCard
             selected={selectedDriver}
             setSelected={() => setSelectedDriver(Number(item.id!))}
-            driver={item}
+            item={item}
           />
         )}
         ListFooterComponent={() => (
