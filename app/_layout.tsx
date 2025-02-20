@@ -3,6 +3,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { ClerkProvider, ClerkLoaded } from "@clerk/clerk-expo";
 import { tokenCache } from "@/lib/auth";
+import "react-native-get-random-values";
 
 import { useEffect } from "react";
 import "react-native-reanimated";
