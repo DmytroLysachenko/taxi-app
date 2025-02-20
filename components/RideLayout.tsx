@@ -13,7 +13,7 @@ const RideLayout = ({
 }: {
   children: React.ReactNode;
   title: string;
-  snapPoints: string[];
+  snapPoints?: string[];
 }) => {
   const bottomSheetRef = useRef<BottomSheet>(null);
 
