@@ -1,6 +1,9 @@
-import { View, Text, ImageSourcePropType, Image } from "react-native";
-import React from "react";
-import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import { View, Image, Keyboard, TouchableWithoutFeedback } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  GooglePlacesAutocomplete,
+  GooglePlacesAutocompleteRef,
+} from "react-native-google-places-autocomplete";
 import { GoogleInputProps } from "@/types/type";
 import { icons } from "@/constants";
 
@@ -13,11 +16,16 @@ const GoogleTextInput = ({
   containerStyle,
   handlePress,
 }: GoogleInputProps) => {
+  const ref = useRef<GooglePlacesAutocompleteRef>(null);
+
   return (
     <View
       className={`flex flex-row items-center justify-center relative z-20 rounded-xl ${containerStyle} mb-5`}
     >
       <GooglePlacesAutocomplete
+        ref={ref}
+        enablePoweredByContainer={false}
+        numberOfLines={2}
         fetchDetails
         placeholder="Where do you want to go?"
         debounce={200}
@@ -46,6 +54,9 @@ const GoogleTextInput = ({
             borderRadius: 10,
             shadowColor: "#d4d4d4",
             zIndex: 100,
+          },
+          row: {
+            backgroundColor: "transparent",
           },
         }}
         onPress={(data, details = null) => {

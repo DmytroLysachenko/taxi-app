@@ -1,12 +1,12 @@
 import { View, Text } from "react-native";
 import React from "react";
 
-const FindRide = () => {
+const DriverCard = () => {
   return (
     <View>
-      <Text>FindRide</Text>
+      <Text>DriverCard</Text>
     </View>
   );
 };
 
-export default FindRide;
+export default DriverCard;

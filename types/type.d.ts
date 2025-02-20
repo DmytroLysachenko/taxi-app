@@ -76,6 +76,8 @@ declare interface GoogleInputProps {
     longitude: number;
     address: string;
   }) => void;
+  handleFocus?: () => void;
+  handleUnfocus?: () => void;
 }
 
 declare interface InputFieldProps extends TextInputProps {

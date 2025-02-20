@@ -1,4 +1,4 @@
-import { View, Text } from "react-native";
+import { View } from "react-native";
 import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
 import React, { useEffect, useState } from "react";
 import { useDriverStore, useLocationStore } from "@/store";
@@ -86,34 +86,30 @@ const Map = () => {
   }, []);
 
   return (
-    <View className="flex flex-1">
-      <MapView
-        provider={PROVIDER_DEFAULT}
-        tintColor="black"
-        className="rounded-lg w-full h-full"
-        showsUserLocation
-        showsPointsOfInterest
-        userInterfaceStyle="light"
-      >
-        <View className="flex w-[90vw] h-full">
-          {markers.map((marker) => (
-            <Marker
-              key={marker.id}
-              coordinate={{
-                latitude: marker.latitude,
-                longitude: marker.longitude,
-              }}
-              title={marker.title}
-              image={
-                selectedDriver === marker.id
-                  ? icons.selectedMarker
-                  : icons.marker
-              }
-            />
-          ))}
-        </View>
-      </MapView>
-    </View>
+    <MapView
+      provider={PROVIDER_DEFAULT}
+      tintColor="black"
+      className="rounded-lg w-full h-full"
+      showsUserLocation
+      showsPointsOfInterest
+      userInterfaceStyle="light"
+    >
+      <View className="flex w-[90vw] h-full">
+        {markers.map((marker) => (
+          <Marker
+            key={marker.id}
+            coordinate={{
+              latitude: marker.latitude,
+              longitude: marker.longitude,
+            }}
+            title={marker.title}
+            image={
+              selectedDriver === marker.id ? icons.selectedMarker : icons.marker
+            }
+          />
+        ))}
+      </View>
+    </MapView>
   );
 };
 

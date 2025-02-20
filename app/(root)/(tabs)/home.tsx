@@ -140,7 +140,7 @@ export default function Page() {
   }) => {
     setDestinationLocation(location);
 
-    router.push("/(root)/(tabs)/find-ride");
+    router.push("/(root)/find-ride");
   };
 
   useEffect(() => {
@@ -225,6 +225,7 @@ export default function Page() {
             <GoogleTextInput
               icon={icons.search}
               containerStyle="bg-white shadow-md shadow-neutral-300"
+              textInputBackgroundColor="white"
               handlePress={handleDestinationPress}
             />
 
