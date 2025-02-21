@@ -4,6 +4,8 @@ import CustomButton from "./CustomButton";
 import { useStripe } from "@stripe/stripe-react-native";
 import { fetchAPI } from "@/lib/fetch";
 import { PaymentProps } from "@/types/type";
+import { useLocationStore } from "@/store";
+import { useAuth } from "@clerk/clerk-expo";
 
 const Payment = ({
   fullName,
@@ -14,12 +16,18 @@ const Payment = ({
 }: PaymentProps) => {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
 
-  const [success, setSuccess] = useState(false);
+  const { userId } = useAuth();
 
-  // const key = await fetchKey();
-  useEffect(() => {
-    // fetchPublishableKey();
-  }, []);
+  const {
+    userAddress,
+    userLatitude,
+    userLongitude,
+    destinationAddress,
+    destinationLatitude,
+    destinationLongitude,
+  } = useLocationStore();
+
+  const [success, setSuccess] = useState(false);
 
   const initializePaymentSheet = async () => {
     const { error } = await initPaymentSheet({
@@ -62,7 +70,23 @@ const Payment = ({
       });
 
       if (result.client_secret) {
-        // ride/create
+        await fetchAPI("/(api)/ride/create", {
+          method: "POST",
+          headers: { "Content-type": "application/json" },
+          body: JSON.stringify({
+            origin_address: userAddress,
+            destination_address: destinationAddress,
+            origin_latitude: userLatitude,
+            origin_longitude: userLongitude,
+            destination_latitude: destinationLatitude,
+            destination_longitude: destinationLongitude,
+            ride_time: rideTime.toFixed(0),
+            fare_price: parseInt(amount) * 100,
+            payment_status: "paid",
+            driver_id: driverId,
+            user_id: userId,
+          }),
+        });
       }
     }
   };

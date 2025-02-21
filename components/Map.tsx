@@ -10,6 +10,7 @@ import {
 import { Driver, MarkerData } from "@/types/type";
 import { icons } from "@/constants";
 import { useFetch } from "@/lib/fetch";
+import MapViewDirections from "react-native-maps-directions";
 
 const Map = () => {
   const {
@@ -84,13 +85,15 @@ const Map = () => {
       tintColor="black"
       className="rounded-lg w-full h-full"
       showsUserLocation
-      region={
-        {
-          latitude: userLatitude,
-          longitude: userLongitude,
-        } as Region
-      }
+      initialRegion={{
+        latitude: userLatitude!,
+        longitude: userLongitude!,
+        latitudeDelta: 1,
+        longitudeDelta: 1,
+      }}
+      minZoomLevel={14}
       showsPointsOfInterest
+      showsCompass={false}
       userInterfaceStyle="light"
     >
       <View className="flex w-[90vw] h-full">
@@ -107,6 +110,31 @@ const Map = () => {
             }
           />
         ))}
+
+        {destinationLatitude && destinationLongitude && (
+          <>
+            <Marker
+              key="destination"
+              coordinate={{
+                latitude: destinationLatitude,
+                longitude: destinationLongitude,
+              }}
+              title="Destination"
+              image={icons.pin}
+            />
+
+            <MapViewDirections
+              origin={{ latitude: userLatitude!, longitude: userLongitude! }}
+              destination={{
+                latitude: destinationLatitude!,
+                longitude: destinationLongitude!,
+              }}
+              apikey={process.env.EXPO_PUBLIC_GOOGLE_API_KEY!}
+              strokeColor="#0286ff"
+              strokeWidth={4}
+            />
+          </>
+        )}
       </View>
     </MapView>
   );
