@@ -8,7 +8,6 @@ import { useDriverStore } from "@/store";
 
 const ConfirmRide = () => {
   const { drivers, selectedDriver, setSelectedDriver } = useDriverStore();
-  console.log(drivers, selectedDriver);
 
   return (
     <RideLayout

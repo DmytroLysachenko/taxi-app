@@ -1,10 +1,15 @@
-import { View } from "react-native";
-import MapView, { Marker, PROVIDER_DEFAULT } from "react-native-maps";
+import { ActivityIndicator, Text, View } from "react-native";
+import MapView, { Marker, PROVIDER_DEFAULT, Region } from "react-native-maps";
 import React, { useEffect, useState } from "react";
 import { useDriverStore, useLocationStore } from "@/store";
-import { calculateRegion, generateMarkersFromData } from "@/lib/map";
-import { MarkerData } from "@/types/type";
+import {
+  calculateDriverTimes,
+  calculateRegion,
+  generateMarkersFromData,
+} from "@/lib/map";
+import { Driver, MarkerData } from "@/types/type";
 import { icons } from "@/constants";
+import { useFetch } from "@/lib/fetch";
 
 const Map = () => {
   const {
@@ -14,15 +19,10 @@ const Map = () => {
     destinationLongitude,
   } = useLocationStore();
 
-  const { selectedDriver } = useDriverStore();
-  const [markers, setMarkers] = useState<MarkerData[]>([]);
+  const { selectedDriver, setDrivers } = useDriverStore();
 
-  const region = calculateRegion({
-    userLatitude,
-    userLongitude,
-    destinationLatitude,
-    destinationLongitude,
-  });
+  const { data: drivers, loading, error } = useFetch<Driver[]>("/(api)/driver");
+  const [markers, setMarkers] = useState<MarkerData[]>([]);
 
   useEffect(() => {
     if (Array.isArray(drivers)) {
@@ -36,7 +36,47 @@ const Map = () => {
 
       setMarkers(newMarkers);
     }
-  }, []);
+  }, [drivers, userLatitude, userLongitude]);
+
+  useEffect(() => {
+    if (markers.length > 0 && destinationLatitude && destinationLongitude) {
+      calculateDriverTimes({
+        markers,
+        userLatitude,
+        userLongitude,
+        destinationLatitude,
+        destinationLongitude,
+      }).then((drivers) => {
+        setDrivers(drivers as MarkerData[]);
+      });
+    }
+  }, [markers, destinationLatitude, destinationLongitude]);
+
+  const region = calculateRegion({
+    userLatitude,
+    userLongitude,
+    destinationLatitude,
+    destinationLongitude,
+  });
+
+  if (loading || (!userLatitude && !userLongitude)) {
+    return (
+      <View className="flex justify-between items-center w-full">
+        <ActivityIndicator
+          size="small"
+          color="#000"
+        />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View className="flex justify-between items-center w-full">
+        <Text>Error: {error}</Text>
+      </View>
+    );
+  }
 
   return (
     <MapView
@@ -44,6 +84,12 @@ const Map = () => {
       tintColor="black"
       className="rounded-lg w-full h-full"
       showsUserLocation
+      region={
+        {
+          latitude: userLatitude,
+          longitude: userLongitude,
+        } as Region
+      }
       showsPointsOfInterest
       userInterfaceStyle="light"
     >
