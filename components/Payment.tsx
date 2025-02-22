@@ -1,11 +1,16 @@
-import { Alert } from "react-native";
-import React, { useEffect, useState } from "react";
+import { Alert, Image, Text, View } from "react-native";
+import React, { useState } from "react";
 import CustomButton from "./CustomButton";
 import { useStripe } from "@stripe/stripe-react-native";
 import { fetchAPI } from "@/lib/fetch";
 import { PaymentProps } from "@/types/type";
 import { useLocationStore } from "@/store";
 import { useAuth } from "@clerk/clerk-expo";
+import { IntentCreationCallbackParams } from "@stripe/stripe-react-native/lib/typescript/src/types/PaymentSheet";
+import { Result } from "@stripe/stripe-react-native/lib/typescript/src/types/PaymentMethod";
+import ReactNativeModal from "react-native-modal";
+import { images } from "@/constants";
+import { router } from "expo-router";
 
 const Payment = ({
   fullName,
@@ -29,21 +34,13 @@ const Payment = ({
 
   const [success, setSuccess] = useState(false);
 
-  const initializePaymentSheet = async () => {
-    const { error } = await initPaymentSheet({
-      merchantDisplayName: "Example, Inc.",
-      intentConfiguration: {
-        mode: { amount: 1090, currencyCode: "USD" },
-        confirmHandler,
-      },
-    });
+  const confirmHandler = async (
+    paymentMethod: Result,
+    _: boolean,
+    intentCreationCallback: (result: IntentCreationCallbackParams) => void
+  ) => {
+    console.log("paymentMethod", paymentMethod);
 
-    if (error) {
-      Alert.alert(`Error code: ${error.code}`);
-    }
-  };
-
-  const confirmHandler = async (paymentMethod, _, intentCreationCallback) => {
     const { paymentIntent, customer } = await fetchAPI(
       "/(api)/(stripe)/create",
       {
@@ -53,10 +50,11 @@ const Payment = ({
           name: fullName || email.split("@")[0],
           email,
           amount,
-          paymentMethodId: paymentMethod.id,
         }),
       }
     );
+
+    console.log("created payment intent", paymentIntent);
 
     if (paymentIntent.client_secret) {
       const { result } = await fetchAPI("/(api)/(stripe)/pay", {
@@ -68,9 +66,10 @@ const Payment = ({
           customer_id: customer,
         }),
       });
+      console.log("created payment", result);
 
       if (result.client_secret) {
-        await fetchAPI("/(api)/ride/create", {
+        const ride = await fetchAPI("/(api)/ride/create", {
           method: "POST",
           headers: { "Content-type": "application/json" },
           body: JSON.stringify({
@@ -87,7 +86,28 @@ const Payment = ({
             user_id: userId,
           }),
         });
+
+        console.log("created ride", ride);
+
+        intentCreationCallback({
+          clientSecret: result.client_secret,
+        });
       }
+    }
+  };
+
+  const initializePaymentSheet = async () => {
+    const { error } = await initPaymentSheet({
+      merchantDisplayName: "Example, Inc.",
+      intentConfiguration: {
+        mode: { amount: parseInt(amount) * 100, currencyCode: "USD" },
+        confirmHandler,
+      },
+      returnURL: 'taxi-app"//book-ride',
+    });
+
+    if (error) {
+      Alert.alert(`Error code: ${error.code}`);
     }
   };
 
@@ -110,6 +130,34 @@ const Payment = ({
         className="my-5"
         onPress={openPaymentsSheet}
       />
+      <ReactNativeModal
+        isVisible={success}
+        onBackdropPress={() => setSuccess(false)}
+      >
+        <View className="flex flex-col items-center justify-center bg-white p-7 rounded-2xl">
+          <Image
+            source={images.check}
+            className="w-28 h-28 mt-5"
+          />
+
+          <Text className="text-2xl font-JakartaBold text-center mt-5">
+            Booking placed successfully
+          </Text>
+
+          <Text className="text-md font-JakartaMedium text-center text-general-200 mt-3">
+            Thank you for your booking. Your reservation has been confirmed.
+          </Text>
+
+          <CustomButton
+            title="Back Home"
+            onPress={() => {
+              setSuccess(false);
+              router.push("/(root)/(tabs)/home");
+            }}
+            className="mt-5"
+          />
+        </View>
+      </ReactNativeModal>
     </>
   );
 };

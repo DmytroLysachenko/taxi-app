@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       payment_method: paymentMethod.id,
     });
 
-    return new Response(
+    return Response.json(
       JSON.stringify({
         success: true,
         message: "Payment confirmed successfully",

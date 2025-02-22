@@ -7,7 +7,7 @@ export async function POST(request: Request) {
     const body = await request.json();
 
     const { name, email, amount } = body;
-
+    console.log("extracted values from body", { name, email, amount });
     if (!name || !email || !amount) {
       return new Response(
         JSON.stringify({ error: "Please enter a valid data", status: 400 })
@@ -16,6 +16,8 @@ export async function POST(request: Request) {
 
     let customer;
     const existingCustomer = await stripe.customers.list({ email });
+
+    console.log("check customer", existingCustomer);
 
     if (existingCustomer.data.length > 0) {
       customer = existingCustomer.data[0];
@@ -34,19 +36,30 @@ export async function POST(request: Request) {
       }
     );
 
+    console.log("ephemeralKey created", ephemeralKey);
+    console.log("amount", amount, parseInt(amount) * 100);
     const paymentIntent = await stripe.paymentIntents.create({
       customer: customer.id,
       amount: parseInt(amount) * 100,
       currency: "usd",
       automatic_payment_methods: { enabled: true, allow_redirects: "never" },
     });
+    console.log("✅ Successfully reached after await paymentIntent");
+    console.log("paymentIntent created", paymentIntent);
 
-    return new Response(
-      JSON.stringify({
+    return Response.json(
+      {
         paymentIntent,
         ephemeralKey,
         customer: customer.id,
-      })
+      },
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+        },
+      }
     );
   } catch (error) {
     console.log(error);
