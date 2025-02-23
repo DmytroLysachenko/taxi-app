@@ -1,10 +1,32 @@
-import { View, Text, Image } from "react-native";
-import React from "react";
+import { View, Text, Image, Alert } from "react-native";
+import React, { useCallback } from "react";
 import CustomButton from "./CustomButton";
 import { icons } from "@/constants";
+import { useSSO } from "@clerk/clerk-expo";
+import * as AuthSession from "expo-auth-session";
+import { router } from "expo-router";
 
 const OAuth = () => {
-  const handleGoogleSignIn = async () => {};
+  const { startSSOFlow } = useSSO();
+
+  const handleGoogleSignIn = useCallback(async () => {
+    try {
+      const { createdSessionId, setActive, signIn, signUp } =
+        await startSSOFlow({
+          strategy: "oauth_google",
+          redirectUrl: AuthSession.makeRedirectUri({
+            path: "/(root)/(tabs)/home",
+          }),
+        });
+
+      if (createdSessionId) {
+        setActive!({ session: createdSessionId });
+      }
+    } catch (err) {
+      Alert.alert("Error during OAuth login, try again please.");
+      console.error(JSON.stringify(err, null, 2));
+    }
+  }, []);
 
   return (
     <View>
