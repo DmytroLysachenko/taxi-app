@@ -11,6 +11,7 @@ import { Result } from "@stripe/stripe-react-native/lib/typescript/src/types/Pay
 import ReactNativeModal from "react-native-modal";
 import { images } from "@/constants";
 import { router } from "expo-router";
+import * as Linking from "expo-linking";
 
 const Payment = ({
   fullName,
@@ -97,13 +98,14 @@ const Payment = ({
   };
 
   const initializePaymentSheet = async () => {
+    const returnURL = Linking.createURL("/(root)/book-ride");
     const { error } = await initPaymentSheet({
       merchantDisplayName: "Example, Inc.",
       intentConfiguration: {
         mode: { amount: parseInt(amount) * 100, currencyCode: "USD" },
         confirmHandler,
       },
-      returnURL: 'taxi-app"//book-ride',
+      returnURL: "taxi-app://book-ride",
     });
 
     if (error) {

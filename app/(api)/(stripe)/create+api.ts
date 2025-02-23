@@ -48,18 +48,11 @@ export async function POST(request: Request) {
     console.log("paymentIntent created", paymentIntent);
 
     return Response.json(
-      {
+      JSON.stringify({
         paymentIntent,
         ephemeralKey,
         customer: customer.id,
-      },
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-        },
-      }
+      })
     );
   } catch (error) {
     console.log(error);
