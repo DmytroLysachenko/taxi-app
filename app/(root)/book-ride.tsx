@@ -22,7 +22,7 @@ const BookRide = () => {
     <StripeProvider
       publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY!}
       merchantIdentifier="merchant.uber.com"
-      urlScheme="taxi-app"
+      urlScheme="myapp"
     >
       <RideLayout title="Book Ride">
         <Text className="text-xl font-JakartaSemiBold mb-3">

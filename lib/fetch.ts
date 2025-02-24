@@ -2,13 +2,16 @@ import { useState, useEffect, useCallback } from "react";
 
 export const fetchAPI = async (url: string, options?: RequestInit) => {
   try {
-    const response = await fetch(url, options);
-
     console.log(`📡 Fetching API: ${url}`, options);
+
+    const response = await fetch(url, { mode: "cors", ...options });
+
+    console.log(`📡 Fetched API: ${url}`, response);
     if (!response.ok) {
       const errorText = await response.text(); // Capture error response body
       throw new Error(`HTTP error! Status: ${response.status} - ${errorText}`);
     }
+
     return await response.json();
   } catch (error) {
     console.error("Fetch error:", error);

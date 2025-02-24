@@ -17,15 +17,19 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as Location from "expo-location";
 import { router } from "expo-router";
 import { useFetch } from "@/lib/fetch";
+import { Ride } from "@/types/type";
 
 export default function Page() {
   const { user } = useUser();
   const { setUserLocation, setDestinationLocation } = useLocationStore();
-  const [hasPermissions, setHasPermissions] = useState(false);
+  const [hasPermission, setHasPermission] = useState(false);
   const { signOut } = useAuth();
-  const { data: recentRides } = useFetch(`/(api)/ride/${user?.id}`);
-
-  const loading = false;
+  const {
+    data: recentRides,
+    loading,
+  }: { data: Ride[] | null; loading: boolean } = useFetch(
+    `/(api)/ride/${user?.id}`
+  );
 
   const handleSignOut = () => {
     signOut();
@@ -48,7 +52,10 @@ export default function Page() {
       let { status } = await Location.requestForegroundPermissionsAsync();
 
       if (status !== "granted") {
+        setHasPermission(false);
         return;
+      } else {
+        setHasPermission(true);
       }
 
       const location = await Location.getCurrentPositionAsync();
@@ -129,15 +136,17 @@ export default function Page() {
               handlePress={handleDestinationPress}
             />
 
-            <>
-              <Text className="text-xl font-JakartaBold mt-5 mb-3">
-                Your Current Location
-              </Text>
+            {hasPermission && (
+              <>
+                <Text className="text-xl font-JakartaBold mt-5 mb-3">
+                  Your Current Location
+                </Text>
 
-              <View className="flex flex-row items-center bg-transparent h-[300px]">
-                <Map />
-              </View>
-            </>
+                <View className="flex flex-row items-center bg-transparent h-[300px]">
+                  <Map />
+                </View>
+              </>
+            )}
 
             <Text className="text-xl font-JakartaBold mt-5 mb-3">
               Recent Rides

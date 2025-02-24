@@ -3,7 +3,7 @@ import React, { useCallback } from "react";
 import CustomButton from "./CustomButton";
 import { icons } from "@/constants";
 import { useSSO } from "@clerk/clerk-expo";
-import * as AuthSession from "expo-auth-session";
+import { googleOAuth } from "@/lib/auth";
 import { router } from "expo-router";
 
 const OAuth = () => {
@@ -11,20 +11,16 @@ const OAuth = () => {
 
   const handleGoogleSignIn = useCallback(async () => {
     try {
-      const { createdSessionId, setActive, signIn, signUp } =
-        await startSSOFlow({
-          strategy: "oauth_google",
-          redirectUrl: AuthSession.makeRedirectUri({
-            path: "/(root)/(tabs)/home",
-          }),
-        });
+      const result = await googleOAuth(startSSOFlow);
 
-      if (createdSessionId) {
-        setActive!({ session: createdSessionId });
+      if (result.code === "session_exists") {
+        Alert.alert("Success", "Session already exists");
+        router.push("/(root)/(tabs)/home");
       }
+
+      Alert.alert(result.success ? "Success" : "Error", result.message);
     } catch (err) {
-      Alert.alert("Error during OAuth login, try again please.");
-      console.error(JSON.stringify(err, null, 2));
+      console.log(err);
     }
   }, []);
 
@@ -32,7 +28,9 @@ const OAuth = () => {
     <View>
       <View className="flex flex-row justify-center items-center mt-4 gap-x-3">
         <View className="flex-1 h-[1px] bg-general-100" />
+
         <Text className="text-lg">Or</Text>
+
         <View className="flex-1 h-[1px] bg-general-100" />
       </View>
 

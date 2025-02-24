@@ -1,11 +1,12 @@
-import { View, Image, Keyboard, TouchableWithoutFeedback } from "react-native";
-import React, { useEffect, useRef, useState } from "react";
+import { View, Image } from "react-native";
+import React, { useRef } from "react";
 import {
   GooglePlacesAutocomplete,
   GooglePlacesAutocompleteRef,
 } from "react-native-google-places-autocomplete";
 import { GoogleInputProps } from "@/types/type";
 import { icons } from "@/constants";
+import { useLocationStore } from "@/store";
 
 const googlePlacesApiKey = process.env.EXPO_PUBLIC_GOOGLE_API_KEY;
 
@@ -17,6 +18,7 @@ const GoogleTextInput = ({
   handlePress,
 }: GoogleInputProps) => {
   const ref = useRef<GooglePlacesAutocompleteRef>(null);
+  const { userLatitude, userLongitude } = useLocationStore();
 
   return (
     <View
@@ -29,6 +31,13 @@ const GoogleTextInput = ({
         fetchDetails
         placeholder="Where do you want to go?"
         debounce={200}
+        query={{
+          key: process.env.EXPO_PUBLIC_GOOGLE_API_KEY!,
+          language: "en",
+          location: `${userLatitude},${userLongitude}`,
+          radius: Boolean(userLatitude && userLongitude) ? 20000 : undefined,
+          strictbounds: Boolean(userLatitude && userLongitude),
+        }}
         styles={{
           textInputContainer: {
             alignItems: "center",
@@ -65,10 +74,6 @@ const GoogleTextInput = ({
             longitude: details?.geometry.location.lng!,
             address: data.description,
           });
-        }}
-        query={{
-          key: googlePlacesApiKey,
-          language: "en",
         }}
         renderLeftButton={() => (
           <View className="justify-center items-center w-6 h-6">

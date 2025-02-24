@@ -31,24 +31,16 @@ const Payment = ({
   const { userId } = useAuth();
   const [success, setSuccess] = useState<boolean>(false);
 
-  const openPaymentSheet = async () => {
-    await initializePaymentSheet();
-
-    const { error } = await presentPaymentSheet();
-
-    if (error) {
-      Alert.alert(`Error code: ${error.code}`, error.message);
-    } else {
-      setSuccess(true);
-    }
-  };
+  // TODO: RECHECK FULLY STRIPE PAYMENT PROCESS, RESPONSE FROM BACKEND IS NOT RECIEVED
 
   const initializePaymentSheet = async () => {
+    console.log("Initializing payment sheet...");
+
     const { error } = await initPaymentSheet({
       merchantDisplayName: "Example, Inc.",
       intentConfiguration: {
         mode: {
-          amount: parseInt(amount) * 100,
+          amount: Number(amount) * 100,
           currencyCode: "usd",
         },
         confirmHandler: async (
@@ -56,6 +48,9 @@ const Payment = ({
           shouldSavePaymentMethod,
           intentCreationCallback
         ) => {
+          console.log("confirmHandler triggered");
+
+          console.log("Calling /(api)/(stripe)/create...");
           const { paymentIntent, customer } = await fetchAPI(
             "/(api)/(stripe)/create",
             {
@@ -72,20 +67,10 @@ const Payment = ({
             }
           );
 
-          fetchAPI("/(api)/(stripe)/create", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              name: fullName || email.split("@")[0],
-              email: email,
-              amount: amount,
-              paymentMethodId: paymentMethod.id,
-            }),
-          });
+          console.log("FRONT END - PaymentIntent:", paymentIntent);
 
           if (paymentIntent.client_secret) {
+            console.log("Calling /(api)/(stripe)/pay...");
             const { result } = await fetchAPI("/(api)/(stripe)/pay", {
               method: "POST",
               headers: {
@@ -99,7 +84,10 @@ const Payment = ({
               }),
             });
 
+            console.log("FRONT END - Payment Result:", result);
+
             if (result.client_secret) {
+              console.log("Calling /(api)/ride/create...");
               await fetchAPI("/(api)/ride/create", {
                 method: "POST",
                 headers: {
@@ -120,18 +108,38 @@ const Payment = ({
                 }),
               });
 
+              console.log("Passing clientSecret to intentCreationCallback...");
               intentCreationCallback({
                 clientSecret: result.client_secret,
               });
+            } else {
+              console.error("Client secret not found in result");
             }
+          } else {
+            console.error("Client secret not found in PaymentIntent");
           }
         },
       },
       returnURL: "myapp://book-ride",
     });
 
-    if (!error) {
-      // setLoading(true);
+    if (error) {
+      console.error("Error initializing payment sheet:", error);
+      Alert.alert("Error", "Failed to initialize payment sheet.");
+    } else {
+      console.log("Payment sheet initialized successfully");
+    }
+  };
+
+  const openPaymentSheet = async () => {
+    await initializePaymentSheet();
+
+    const { error } = await presentPaymentSheet();
+
+    if (error) {
+      Alert.alert(`Error code: ${error.code}`, error.message);
+    } else {
+      setSuccess(true);
     }
   };
 

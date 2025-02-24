@@ -27,6 +27,7 @@ const ConfirmRide = () => {
           <View className="mx-5 mt-10">
             <CustomButton
               title="Select Ride"
+              disabled={!selectedDriver}
               onPress={() => router.push("/(root)/book-ride")}
             />
           </View>
