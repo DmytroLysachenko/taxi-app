@@ -120,7 +120,7 @@ const Payment = ({
           }
         },
       },
-      returnURL: "myapp://book-ride",
+      returnURL: "myapp://book-ride/",
     });
 
     if (error) {
@@ -132,6 +132,7 @@ const Payment = ({
   };
 
   const openPaymentSheet = async () => {
+    console.log("Opening payment sheet...");
     await initializePaymentSheet();
 
     const { error } = await presentPaymentSheet();
